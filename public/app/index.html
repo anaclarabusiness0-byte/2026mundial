@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ChinaBet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Nunito:wght@400;600;700;800&family=DM+Mono:wght@400;500;700&family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d0b1a;--bg2:#130f24;--surface:#1c1635;--surface2:#241d45;
+    --purple:#7c3aed;--purple2:#9d5ff3;--gold:#f5c518;--gold2:#ffd84d;
+    --green:#00e676;--green2:#69f0ae;--pink:#e040fb;
+    --text:#e8deff;--text2:#9d8fc2;
+    --border:rgba(124,58,237,0.3);--radius:12px;--nav-h:64px;--tab-h:68px;
+    --font-head:'Orbitron',sans-serif;--font-body:'Nunito',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100dvh;overflow-x:hidden}
+
+  /* NAVBAR */
+  .navbar{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;z-index:100;backdrop-filter:blur(10px);gap:14px}
+  .logo{display:flex;align-items:center;font-family:var(--font-head);font-size:1.45rem;font-weight:900;letter-spacing:1px;line-height:1;flex:1}
+  .logo-progress{color:var(--green)}
+  .logo-bet{color:#ffffff;text-shadow:0 1px 4px rgba(0,0,0,0.5)}
+  .nav-menu-btn{background:none;border:none;color:var(--text2);font-size:1.5rem;cursor:pointer;padding:6px;flex-shrink:0;transition:color 0.2s;line-height:1}
+  .nav-menu-btn:hover{color:var(--green)}
+  .nav-actions{display:flex;gap:8px;flex-shrink:0}
+  .btn{padding:8px 18px;border-radius:8px;font-family:var(--font-body);font-weight:700;font-size:0.82rem;cursor:pointer;border:none;transition:all 0.2s}
+  .btn-outline{background:transparent;border:1.5px solid var(--purple2);color:var(--purple2)}
+  .btn-outline:hover{background:var(--purple);color:#fff}
+  .btn-primary{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;box-shadow:0 4px 15px rgba(124,58,237,0.4)}
+  .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0d0b1a;font-weight:800}
+
+  /* SIDE DRAWER */
+  .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(3px)}
+  .drawer-overlay.open{opacity:1;pointer-events:all}
+  .drawer{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--bg2);border-right:1px solid var(--border);z-index:301;transform:translateX(-100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);display:flex;flex-direction:column}
+  .drawer-overlay.open .drawer{transform:translateX(0)}
+  .drawer-head{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .drawer-logo{font-family:var(--font-head);font-size:1.1rem;font-weight:900}
+  .drawer-close{background:var(--surface2);border:none;color:var(--text2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+  .drawer-body{flex:1;padding:16px 0;overflow-y:auto}
+  .drawer-section-label{font-size:0.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;padding:10px 20px 4px}
+  .drawer-item{display:flex;align-items:center;gap:14px;padding:13px 20px;cursor:pointer;transition:background 0.2s;border:none;background:none;width:100%;text-align:left;color:var(--text);font-family:var(--font-body);font-weight:600;font-size:0.9rem;text-decoration:none}
+  .drawer-item:hover{background:var(--surface)}
+  .drawer-item .di-icon{font-size:1.3rem;width:28px;text-align:center;flex-shrink:0}
+  .drawer-item .di-info{display:flex;flex-direction:column;gap:2px}
+  .drawer-item .di-title{font-weight:700;font-size:0.88rem}
+  .drawer-item .di-sub{font-size:0.72rem;color:var(--text2)}
+  .drawer-item.green .di-icon{filter:drop-shadow(0 0 6px rgba(0,230,118,0.6))}
+  .drawer-item.green .di-title{color:var(--green)}
+  .drawer-item.gold .di-title{color:var(--gold)}
+  .drawer-footer{padding:16px 20px;border-top:1px solid var(--border)}
+  .drawer-footer p{font-size:0.72rem;color:var(--text2);text-align:center;line-height:1.5}
+
+  /* AFILIADO MODAL */
+  .aff-modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:400;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px}
+  .aff-modal-back.open{display:flex}
+  .aff-modal{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:400px}
+  .aff-modal h3{font-family:var(--font-head);font-size:0.95rem;font-weight:700;color:var(--gold);margin-bottom:6px;text-align:center}
+  .aff-modal p{font-size:0.82rem;color:var(--text2);text-align:center;margin-bottom:20px;line-height:1.5}
+  .aff-code-box{background:var(--surface);border:2px solid var(--green);border-radius:12px;padding:16px;text-align:center;margin-bottom:16px}
+  .aff-code{font-family:var(--font-head);font-size:1.4rem;font-weight:900;color:var(--green);letter-spacing:4px;text-shadow:0 0 12px rgba(0,230,118,0.5)}
+  .aff-code-sub{font-size:0.72rem;color:var(--text2);margin-top:4px}
+  .aff-link{background:var(--surface);border-radius:8px;padding:10px 14px;font-size:0.75rem;color:var(--purple2);word-break:break-all;margin-bottom:16px;border:1px solid var(--border)}
+
+  /* SCROLL */
+  .scroll-area{margin-top:var(--nav-h);padding-bottom:var(--tab-h);overflow-y:auto;min-height:calc(100dvh - var(--nav-h));background:var(--bg)}
+  /* DEPOSIT 3D BUTTONS */
+  .dep-value{background:var(--surface2)!important;border:none!important;color:var(--text)!important;font-weight:700;border-radius:10px;box-shadow:0 4px 0 rgba(0,0,0,0.4),0 6px 16px rgba(0,0,0,0.2);transition:all .1s ease;transform:translateY(-1px)}
+  .dep-value:active{transform:translateY(2px)!important;box-shadow:0 1px 0 rgba(0,0,0,0.4)!important}
+  .dep-value.selected{background:var(--purple)!important;color:#fff!important;transform:translateY(2px)!important;box-shadow:0 1px 0 rgba(0,0,0,0.4)!important}
+  /* FINTECH BALANCE */
+  .deposit-balance-wrap{padding:8px 0 24px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:20px}
+  .deposit-balance-label{font-family:'Inter',sans-serif;font-size:0.65rem;font-weight:500;color:rgba(255,255,255,0.3);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:12px}
+  .deposit-balance-value{display:flex;align-items:baseline;justify-content:center;gap:8px}
+  .deposit-balance-currency{font-family:'Inter',sans-serif;font-size:1rem;font-weight:300;color:rgba(255,255,255,0.3)}
+  .deposit-balance-amount{font-family:'Inter',sans-serif;font-size:2.8rem;font-weight:200;color:#fff;letter-spacing:-2px;line-height:1}
+  /* DEPOSIT INPUT */
+  .dep-input-wrap{position:relative;margin-bottom:16px}
+  .dep-input-label{font-family:'Inter',sans-serif;font-size:0.65rem;font-weight:500;color:rgba(255,255,255,0.3);letter-spacing:2.5px;text-transform:uppercase;text-align:center;margin-bottom:10px}
+  .dep-currency-prefix{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-family:'Inter',sans-serif;font-size:1rem;font-weight:300;color:rgba(255,255,255,0.3);pointer-events:none}
+  .dep-input-wrap .form-input{background:rgba(255,255,255,0.04)!important;border:none!important;border-bottom:1px solid rgba(255,255,255,0.12)!important;border-radius:0!important;padding:14px 18px 14px 46px!important;font-family:'Inter',sans-serif!important;font-size:1.8rem!important;font-weight:200!important;color:#fff!important;letter-spacing:-1px!important}
+  .dep-input-wrap .form-input:focus{border-bottom-color:rgba(255,255,255,0.35)!important;box-shadow:none!important}
+
+  /* TICKER */
+  .ticker{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:10px;overflow:hidden}
+  .ticker-text{font-size:0.8rem;color:var(--text2);white-space:nowrap;animation:ticker 25s linear infinite}
+  @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* BANNER */
+  .banner-wrap{position:relative;overflow:hidden;height:160px}
+  .banner-track{display:flex;transition:transform 0.5s ease;height:100%}
+  .banner{min-width:100%;height:100%;display:flex;align-items:center;padding:20px 24px;position:relative;overflow:hidden}
+  .banner-1{background:linear-gradient(135deg,#0a1628,#1a0a3e,#2d1b6e)}
+  .banner-2{background:linear-gradient(135deg,#041a10,#0a3020,#0a4a28)}
+  .banner-3{background:linear-gradient(135deg,#1a0a0a,#2d0a1a,#4a0a2a)}
+  .banner-tag{background:rgba(0,230,118,0.15);border:1px solid var(--green);color:var(--green);font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:inline-block}
+  .banner-title{font-family:var(--font-head);font-size:1rem;font-weight:700;color:#fff;line-height:1.3;max-width:200px}
+  .banner-value{font-family:var(--font-head);font-size:1.6rem;font-weight:900;color:var(--green);text-shadow:0 0 20px rgba(0,230,118,0.6);margin-top:4px}
+  .banner-wrap{opacity:1;transition:opacity 0.3s ease}
+  .logo{opacity:1;transition:opacity 0.3s ease}
+  .banner-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5}
+  .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;transition:all 0.3s}
+  .dot.active{background:var(--green);width:18px;border-radius:3px}
+
+  /* JACKPOT */
+  .jackpot-banner{margin:12px;border-radius:var(--radius);background:linear-gradient(180deg,#1a5c1a 0%,#2d8a2d 30%,#2d8a2d 70%,#1a5c1a 100%);border:2px solid rgba(255,255,255,0.3);padding:12px 16px;box-shadow:0 4px 24px rgba(0,0,0,0.5);position:relative;overflow:hidden}
+  .jackpot-banner::before{content:'';position:absolute;inset:0;background:
+  linear-gradient(rgba(255,255,255,0.07) 1px,transparent 1px) 0 0/100% 33.33%,
+  linear-gradient(90deg,rgba(255,255,255,0.07) 1px,transparent 1px) 0 0/33.33% 100%,
+  radial-gradient(ellipse 60% 40% at 50% 50%,transparent 55%,rgba(255,255,255,0.06) 56%,transparent 57%),
+  radial-gradient(circle at 50% 50%,transparent 15%,rgba(255,255,255,0.05) 16%,transparent 17%);pointer-events:none}
+.jackpot-banner::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.15);transform:translateX(-50%);pointer-events:none}
+  .jackpot-title{font-family:var(--font-head);text-align:center;font-size:1.3rem;font-weight:900;color:#fff;letter-spacing:3px;margin-bottom:6px;text-shadow:0 2px 8px rgba(0,0,0,0.8)}
+  .jackpot-amount{text-align:center;font-family:var(--font-head);font-size:1.5rem;font-weight:900;background:linear-gradient(90deg,#ffd700,#ff8c00,#ffd700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 10px rgba(255,165,0,0.8))}
+  .jackpot-match{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:12px}
+  .jm-flag-wrap{position:relative;width:52px;height:52px}
+  .jm-flag{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);display:none}
+  .jm-flag-placeholder{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:1.6rem;border:2px solid rgba(255,255,255,0.2)}
+  .jm-vs{display:flex;align-items:center;justify-content:center}
+  .jm-x{font-family:var(--font-head);font-size:1.4rem;font-weight:900;color:rgba(255,255,255,0.9);text-shadow:0 2px 8px rgba(0,0,0,0.3)}
+  .jm-date{text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.6);margin-top:8px;letter-spacing:0.5px}
+
+  /* CATEGORIES */
+  .categories{display:flex;gap:4px;padding:0 12px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+  .categories::-webkit-scrollbar{display:none}
+  .live-dot{display:inline-block;width:7px;height:7px;background:#ff3b3b;border-radius:50%;margin-right:4px;vertical-align:middle;box-shadow:0 0 6px #ff3b3b;animation:livePulse 1.2s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 6px #ff3b3b}50%{opacity:0.4;box-shadow:0 0 2px #ff3b3b}}
+  .cat-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;background:none;border:none;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:var(--font-body);font-size:0.75rem;font-weight:600;border-bottom:2px solid transparent;transition:all 0.2s;flex-shrink:0}
+  .cat-btn.active{color:var(--green);border-bottom-color:var(--green)}
+
+  /* GAMES */
+  .section-header{display:flex;align-items:center;gap:8px;padding:14px 12px 8px}
+  .section-header h2{font-family:var(--font-head);font-size:0.95rem;font-weight:700}
+  .games-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 12px 12px}
+  .game-card{aspect-ratio:3/4;border-radius:10px;overflow:hidden;position:relative;cursor:pointer;background:var(--surface);border:1px solid var(--border);transition:transform 0.2s,box-shadow 0.2s}
+  .game-card:active{transform:scale(0.97)}
+  .game-card:hover{box-shadow:0 8px 25px rgba(0,230,118,0.3);border-color:var(--green)}
+  .game-thumb{width:100%;height:100%;object-fit:cover;display:block}
+  .game-thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:linear-gradient(135deg,var(--surface),var(--surface2))}
+  .game-badge{position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.75);border:1px solid var(--green);border-radius:5px;padding:2px 6px;font-size:0.6rem;font-weight:700;color:var(--green)}
+  /* .game-fav removed */
+  .game-name{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(13,11,26,0.95));padding:20px 8px 8px;font-size:0.7rem;font-weight:700;text-align:center;line-height:1.2}
+
+  /* BOTTOM TAB */
+  .bottom-tab{position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:var(--bg2);border-top:1px solid var(--border);display:flex;z-index:100}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:none;border:none;color:var(--text2);cursor:pointer;font-family:var(--font-body);font-size:0.65rem;font-weight:700;transition:all 0.2s}
+  .tab-btn .tab-icon{font-size:1.3rem}
+  .tab-btn.active{color:var(--green)}
+  .tab-deposit{background:linear-gradient(135deg,var(--purple),var(--pink));margin:8px 4px;border-radius:10px;color:#fff!important;box-shadow:0 4px 15px rgba(124,58,237,0.5)}
+
+  /* MODALS */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity 0.3s}
+  .overlay.open{opacity:1;pointer-events:all}
+  .modal{background:var(--bg2);border-radius:24px 24px 0 0;border:1px solid var(--border);border-bottom:none;padding:24px 20px 32px;width:100%;max-width:480px;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.32,0.72,0,1);max-height:92dvh;overflow-y:auto;position:relative;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .overlay.open .modal{transform:translateY(0)}
+  .modal-handle{width:40px;height:4px;background:var(--surface2);border-radius:2px;margin:0 auto 20px}
+  .modal-title{font-family:var(--font-head);font-size:1rem;font-weight:700;text-align:center;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:8px}
+  .modal-tabs{display:flex;background:var(--surface);border-radius:10px;padding:4px;margin-bottom:20px}
+  .modal-tab{flex:1;padding:9px;background:none;border:none;color:var(--text2);font-family:var(--font-body);font-weight:700;font-size:0.85rem;cursor:pointer;border-radius:7px;transition:all 0.2s}
+  .modal-tab.active{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff}
+  .form-group{margin-bottom:14px}
+  .form-label{font-size:0.75rem;font-weight:700;color:var(--text2);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:0.5px}
+  .form-input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--text);font-family:var(--font-body);font-size:0.9rem;outline:none;transition:border-color 0.2s}
+  .form-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,230,118,0.15)}
+  .form-input.error{border-color:#ff4757}
+  .form-input::placeholder{color:var(--text2)}
+  .input-icon-wrap{position:relative}
+  .input-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1rem;color:var(--text2)}
+  .input-icon-wrap .form-input{padding-left:38px}
+  .input-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem}
+  .form-error{font-size:0.72rem;color:#ff4757;margin-top:4px;padding-left:4px}
+  .checkbox-row{display:flex;align-items:center;gap:10px;margin:10px 0 16px}
+  .checkbox-row input{accent-color:var(--green);width:16px;height:16px}
+  .checkbox-row label{font-size:0.8rem;color:var(--text2)}
+  .modal-footer{display:flex;justify-content:space-between;margin-top:16px}
+  .modal-link{background:none;border:none;color:var(--green);font-family:var(--font-body);font-size:0.82rem;font-weight:700;cursor:pointer;text-decoration:underline}
+  .close-x{position:absolute;top:20px;right:20px;background:var(--surface2);border:none;color:var(--text2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+
+  /* TOAST */
+  .toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--surface2);border:1px solid var(--green);border-radius:10px;padding:12px 20px;font-size:0.85rem;font-weight:600;color:var(--text);z-index:999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.success{border-color:var(--green)}
+  .toast.error{border-color:#ff4757}
+  .dep-value.selected{background:var(--purple)!important;color:#fff!important;border-color:var(--purple)!important}
+
+  /* PIX PAYMENT ANIMATIONS */
+  .pix-spinner{width:36px;height:36px;border:3px solid rgba(0,230,118,0.2);border-top:3px solid var(--green);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .pix-dot-anim{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulseDot 1.2s ease-in-out infinite}
+  @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+  @keyframes popIn{from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1}}
+  .pix-timer-red{color:#ff4757!important}
+
+  /* ── MUNDIAL CARDS ─────────────────────────────────────── */
+  .mundial-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px}
+  .mundial-img{width:100%;height:160px;object-fit:cover;display:block}
+  .mundial-img-placeholder{width:100%;height:160px;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-size:3rem}
+  .mundial-body{padding:14px}
+  .mundial-title{font-weight:800;font-size:1rem;color:#fff;margin-bottom:4px;line-height:1.3}
+  .mundial-desc{font-size:0.78rem;color:var(--text2);margin-bottom:12px;line-height:1.5}
+  .mundial-bar-wrap{border-radius:3px;overflow:hidden;height:4px;display:flex;margin-bottom:6px;background:var(--surface2)}
+  .mundial-bar-sim{background:linear-gradient(90deg,#059669,#10b981);height:100%;transition:width 0.5s}
+  .mundial-bar-nao{background:linear-gradient(90deg,#dc2626,#ef4444);height:100%;transition:width 0.5s}
+  .mundial-bar-labels{display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text2);margin-bottom:12px}
+  .mundial-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+  .btn-sim,.btn-nao{display:flex;align-items:center;justify-content:center}
+  .btn-sim{background:#059669;color:#fff;font-weight:700;font-size:0.85rem;border:none;border-radius:10px;padding:11px;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s}
+  .btn-sim:active{transform:scale(0.97)}
+  .btn-nao{background:#dc2626;color:#fff;font-weight:700;font-size:0.85rem;border:none;border-radius:10px;padding:11px;cursor:pointer;transition:transform 0.15s}
+  .btn-nao:active{transform:scale(0.97)}
+  .btn-sim-closed,.btn-nao-closed{opacity:0.5;cursor:not-allowed}
+  .mundial-expand-btn{background:none;border:none;color:var(--text2);font-size:0.75rem;display:flex;align-items:center;gap:4px;cursor:pointer;width:100%;padding:6px 0;border-top:1px solid var(--border);margin-top:2px}
+  .mundial-expand-btn .chevron{transition:transform 0.25s;display:inline-block}
+  .mundial-expand-btn.open .chevron{transform:rotate(180deg)}
+  .mundial-options{padding-top:10px;display:none;flex-direction:column;gap:6px}
+  .mundial-options.open{display:flex}
+  .mundial-opt-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:border-color 0.2s}
+  .mundial-opt-btn:hover{border-color:var(--green)}
+  .mundial-opt-label{font-size:0.82rem;color:#fff;font-weight:600}
+  .mundial-opt-odd{font-size:0.82rem;font-family:'DM Mono',monospace;font-weight:700}
+  .opt-sim-color{color:#059669}
+  .opt-nao-color{color:#dc2626}
+  /* ── BET MODAL ──────────────────────────────────────────── */
+  .bet-sheet{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(12px)}
+  .bet-sheet-inner{background:linear-gradient(160deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.2);border-bottom:none;border-radius:28px 28px 0 0;padding:28px 24px 36px;width:100%;max-width:440px;box-shadow:0 -8px 40px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.2)}
+  .bet-sheet-handle{width:36px;height:3px;background:rgba(255,255,255,0.3);border-radius:2px;margin:0 auto 24px}
+  .bet-sheet-title{font-weight:800;font-size:1.05rem;color:#fff;margin-bottom:4px;text-align:center;font-family:'Inter',sans-serif;text-shadow:0 1px 3px rgba(0,0,0,0.5)}
+  .bet-sheet-sub{font-size:0.78rem;color:rgba(255,255,255,0.6);text-align:center;margin-bottom:20px;font-family:'Inter',sans-serif}
+  .bet-odd-badge{display:inline-block;background:var(--surface);border-radius:8px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:0.9rem;font-weight:700;margin-bottom:18px}
+  .bet-amounts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .bet-amount-chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:none;color:var(--text2);font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+  .bet-amount-chip.active,.bet-amount-chip:hover{border-color:var(--green);color:var(--green);background:rgba(0,200,83,0.1)}
+  .bet-potential{background:var(--surface);border-radius:10px;padding:12px;text-align:center;margin-bottom:16px}
+  .bet-potential-label{font-size:0.72rem;color:var(--text2);margin-bottom:3px}
+  .bet-potential-value{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:700;color:var(--green);letter-spacing:0.02em}
+  /* ── PROFILE ────────────────────────────────────────────── */
+  .profile-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 12px;box-shadow:0 4px 20px rgba(124,58,237,0.4)}
+  .profile-name{text-align:center;font-weight:800;font-size:1.1rem;color:#fff;margin-bottom:2px}
+  .profile-user{text-align:center;font-size:0.78rem;color:var(--text2);margin-bottom:20px}
+  .profile-balance-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;margin-bottom:16px}
+  .profile-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+  .profile-bet-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+  .profile-bet-status{font-size:0.7rem;font-weight:800;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:4px}
+  .pbs-pending{background:rgba(255,171,0,0.15);color:#ffab00}
+  .pbs-won{background:rgba(5,150,105,0.12);color:#059669}
+  .pbs-lost{background:rgba(220,38,38,0.12);color:#dc2626}
+  .pbs-cancelled{background:rgba(150,150,150,0.15);color:#999}
+</style>
+</head>
+<body>
+
+<!-- SIDE DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()">
+  <div class="drawer" onclick="event.stopPropagation()">
+    <div class="drawer-head" id="drawerHead">
+      <div class="drawer-logo">
+        <span style="color:var(--green)">China</span><span style="color:#fff">Bet</span>
+      </div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div id="drawerUserSection"></div>
+    <div class="drawer-body">
+      <div class="drawer-section-label">Comunidade</div>
+
+      <a class="drawer-item green" href="https://t.me/SEU_TELEGRAM_AQUI" target="_blank">
+        <span class="di-icon">📱</span>
+        <div class="di-info">
+          <span class="di-title">Telegram Oficial</span>
+          <span class="di-sub">Bônus, promoções e novidades</span>
+        </div>
+      </a>
+
+      <div class="drawer-section-label">Programa de Afiliados</div>
+
+      <div class="drawer-item gold" onclick="abrirAfiliado()">
+        <span class="di-icon">🤝</span>
+        <div class="di-info">
+          <span class="di-title" style="color:var(--gold)">Seja um Afiliado</span>
+          <span class="di-sub">Ganhe comissão por indicações</span>
+        </div>
+      </div>
+
+      <div class="drawer-section-label">Navegação</div>
+
+      <div class="drawer-item" onclick="closeDrawer();openModal('deposit')">
+        <span class="di-icon">💳</span>
+        <div class="di-info">
+          <span class="di-title">Depositar</span>
+          <span class="di-sub">Depósito via PIX instantâneo</span>
+        </div>
+      </div>
+
+
+      <div class="drawer-item" onclick="closeDrawer()">
+        <span class="di-icon">🎁</span>
+        <div class="di-info">
+          <span class="di-title">Promoções</span>
+          <span class="di-sub">Bônus e ofertas especiais</span>
+        </div>
+      </div>
+
+      <div class="drawer-item" href="https://t.me/SEU_SUPORTE_AQUI" onclick="window.open('https://t.me/SEU_SUPORTE_AQUI','_blank');closeDrawer()">
+        <span class="di-icon">🎧</span>
+        <div class="di-info">
+          <span class="di-title">Suporte</span>
+          <span class="di-sub">Atendimento 24h via Telegram</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- AFILIADO MODAL -->
+<div class="aff-modal-back" id="affModal">
+  <div class="aff-modal">
+    <h3>🤝 Programa de Afiliados</h3>
+    <p>Indique amigos e ganhe comissão em cada depósito deles. Copie seu código ou link exclusivo abaixo:</p>
+    <div class="aff-code-box">
+      <div class="aff-code" id="affCode">---</div>
+      <div class="aff-code-sub">Seu código de afiliado</div>
+    </div>
+    <div class="aff-link" id="affLink">Faça login para ver seu link</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-gold" style="flex:1" onclick="copiarCodigo()">📋 Copiar Código</button>
+      <button class="btn btn-primary" style="flex:1" onclick="copiarLink()">🔗 Copiar Link</button>
+    </div>
+    <button class="btn btn-outline" style="width:100%;margin-top:10px" onclick="fecharAfiliado()">Fechar</button>
+    <p style="font-size:0.7rem;color:var(--text2);text-align:center;margin-top:12px">Comissão de 10% sobre cada depósito indicado</p>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <button class="nav-menu-btn" onclick="openDrawer()">☰</button>
+  <div class="logo">
+    <span class="logo-progress"></span><span class="logo-bet"></span>
+  </div>
+  <div class="nav-actions" id="navActions">
+    <button class="btn btn-outline" onclick="openModal('login')">Login</button>
+    <button class="btn btn-primary" onclick="openModal('register')">Registro</button>
+  </div>
+</nav>
+
+<div class="scroll-area">
+  <div class="ticker">
+    <div class="ticker-text">Invista na Copa &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp; Renda passiva com investimentos em futebol &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp; Mundial 2026 &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp; Invista na Copa &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp; Renda passiva com investimentos em futebol &nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp; Mundial 2026</div>
+  </div>
+
+  <div class="banner-wrap">
+    <div class="banner-track" id="bannerTrack">
+      <div class="banner banner-1"><div><div class="banner-tag">🎁 Bônus Exclusivo</div><div class="banner-title">BÔNUS DE APOSTA DO PARCEIRO DE CASHBACK</div><div class="banner-value">ATÉ 3.0%</div></div></div>
+      <div class="banner banner-2"><div><div class="banner-tag">💰 Primeiro Depósito</div><div class="banner-title">BÔNUS DE BOAS-VINDAS PARA NOVOS MEMBROS</div><div class="banner-value">ATÉ 100%</div></div></div>
+      <div class="banner banner-3"><div><div class="banner-tag">🤝 Afiliados</div><div class="banner-title">INDIQUE AMIGOS E GANHE COMISSÃO</div><div class="banner-value">10% comissão</div></div></div>
+    </div>
+    <div class="banner-dots" id="bannerDots"></div>
+  </div>
+
+  <div class="jackpot-banner">
+    <div class="jackpot-title">ACUMULADO</div>
+    <div class="jackpot-amount" id="jackpotAmount">R$ 1.623.847,39</div>
+    <div class="jackpot-match" id="jackpotMatch">
+      <div class="jm-flag-wrap">
+        <img class="jm-flag" id="jmFlag1" src="" alt="Time 1">
+        <div class="jm-flag-placeholder" id="jmFlag1Ph">🏳️</div>
+      </div>
+      <div class="jm-vs">
+        <span class="jm-x">✕</span>
+      </div>
+      <div class="jm-flag-wrap">
+        <img class="jm-flag" id="jmFlag2" src="" alt="Time 2">
+        <div class="jm-flag-placeholder" id="jmFlag2Ph">🏳️</div>
+      </div>
+    </div>
+    <div class="jm-date" id="jackpotMatchDate">—</div>
+  </div>
+
+  <div class="categories">
+    <button class="cat-btn active" data-cat="mundial">🌎 Mundial</button>
+    <button class="cat-btn" data-cat="aovivo"><span style="display:flex;align-items:center;gap:3px"><span class="live-dot" style="flex-shrink:0"></span><span>Ao Vivo</span></span></button>
+
+  </div>
+
+  <div class="section-header"><span id="sectionIcon">🔥</span><h2 id="sectionTitle">Popular</h2></div>
+  <div class="games-grid" id="gamesGrid"></div>
+</div>
+
+<nav class="bottom-tab">
+  <button class="tab-btn active" onclick="setTab(this);selectCat('mundial')"><span class="tab-icon">🏠</span>Início</button>
+  <button class="tab-btn" onclick="setTab(this);openDrawer()"><span class="tab-icon">🎁</span>Promoção</button>
+  <button class="tab-btn tab-deposit" onclick="openModal('deposit')"><span class="tab-icon">💳</span>Depósito</button>
+  <button class="tab-btn" onclick="window.open('https://t.me/SEU_SUPORTE_AQUI','_blank')"><span class="tab-icon">🎧</span>Suporte</button>
+  <button class="tab-btn" onclick="openModal('profile')"><span class="tab-icon">👤</span>Perfil</button>
+</nav>
+
+<!-- LOGIN -->
+<div class="overlay" id="loginOverlay" onclick="closeOverlay(event,'loginOverlay')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <button class="close-x" onclick="closeModal('loginOverlay')">✕</button>
+    <div class="modal-title">👤 Login</div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchAuthTab('login')">Entrar</button>
+      <button class="modal-tab" onclick="switchAuthTab('register')">Registrar</button>
+    </div>
+    <div class="form-group"><label class="form-label">Usuário ou E-mail</label><div class="input-icon-wrap"><span class="input-icon">👤</span><input class="form-input" id="loginUser" type="text" placeholder="Seu usuário ou e-mail"></div></div>
+    <div class="form-group"><label class="form-label">Senha</label><div class="input-icon-wrap"><span class="input-icon">🔒</span><input class="form-input" id="loginPass" type="password" placeholder="Sua senha"><button class="input-eye" onclick="togglePass('loginPass',this)">👁</button></div></div>
+    <div class="checkbox-row"><input type="checkbox" id="rememberMe"><label for="rememberMe">Lembrar senha</label></div>
+    <button class="btn btn-gold" style="width:100%;padding:14px;font-size:1rem" onclick="doLogin()">Entrar</button>
+    <div class="modal-footer">
+      <button class="modal-link" onclick="window.open('https://t.me/SEU_SUPORTE_AQUI','_blank')">Contactar suporte</button>
+      <button class="modal-link" onclick="switchAuthTab('register')">Registra uma conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="overlay" id="registerOverlay" onclick="closeOverlay(event,'registerOverlay')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <button class="close-x" onclick="closeModal('registerOverlay')">✕</button>
+    <div class="modal-title">🎉 Criar Conta</div>
+    <div class="form-group"><label class="form-label">Nome Completo *</label><div class="input-icon-wrap"><span class="input-icon">📝</span><input class="form-input" id="regName" type="text" placeholder="Seu nome completo"></div><div class="form-error" id="errName"></div></div>
+
+    <div class="form-group"><label class="form-label">CPF *</label><div class="input-icon-wrap"><span class="input-icon">🪪</span><input class="form-input" id="regCpf" type="text" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)"></div><div class="form-error" id="errCpf"></div></div>
+    <div class="form-group"><label class="form-label">Telefone *</label><div class="input-icon-wrap"><span class="input-icon">📱</span><input class="form-input" id="regPhone" type="tel" placeholder="(00) 00000-0000" maxlength="15" oninput="maskPhone(this)"></div><div class="form-error" id="errPhone"></div></div>
+    <div class="form-group"><label class="form-label">E-mail *</label><div class="input-icon-wrap"><span class="input-icon">✉️</span><input class="form-input" id="regEmail" type="email" placeholder="seu@email.com"></div><div class="form-error" id="errEmail"></div></div>
+    <div class="form-group"><label class="form-label">Senha *</label><div class="input-icon-wrap"><span class="input-icon">🔒</span><input class="form-input" id="regPass" type="password" placeholder="Mínimo 8 caracteres"><button class="input-eye" onclick="togglePass('regPass',this)">👁</button></div><div class="form-error" id="errPass"></div></div>
+
+
+    <div class="checkbox-row"><input type="checkbox" id="acceptTerms"><label for="acceptTerms">Aceito os <a href="#" style="color:var(--green)">Termos de Uso</a> e tenho 18 anos ou mais</label></div>
+    <button class="btn btn-gold" style="width:100%;padding:14px;font-size:1rem" onclick="doRegister()">🎉 Criar Minha Conta</button>
+  </div>
+</div>
+
+<!-- DEPOSIT -->
+<div class="overlay" id="depositOverlay" onclick="closeOverlay(event,'depositOverlay')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <button class="close-x" onclick="closeModal('depositOverlay')">✕</button>
+    <div class="modal-title">💳 Depósito via PIX</div>
+    <div class="deposit-balance-wrap">
+      <div class="deposit-balance-label">Saldo Disponível</div>
+      <div class="deposit-balance-value"><span class="deposit-balance-currency">R$</span><span class="deposit-balance-amount" id="modalBalance">0,00</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+      <button class="btn btn-outline dep-value" onclick="setDepValue(this,20)">R$ 20</button>
+      <button class="btn btn-outline dep-value" onclick="setDepValue(this,50)">R$ 50</button>
+      <button class="btn btn-outline dep-value" onclick="setDepValue(this,100)">R$ 100</button>
+      <button class="btn btn-outline dep-value" onclick="setDepValue(this,200)">R$ 200</button>
+      <button class="btn btn-outline dep-value" onclick="setDepValue(this,500)">R$ 500</button>
+      <button class="btn btn-outline dep-value" onclick="setDepValue(this,1000)">R$ 1.000</button>
+    </div>
+    <div class="form-group"><label class="form-label">Ou digite o valor</label><div class="dep-input-wrap"><span class="dep-currency-prefix">R$</span><input class="form-input" id="depAmount" type="text" inputmode="decimal" placeholder="0,00" oninput="maskDepAmount(this)"></div></div>
+    <button class="btn btn-gold" style="width:100%;padding:14px;font-size:1rem" onclick="gerarPix()">Gerar QR Code PIX ⚡</button>
+    <div id="qrArea" style="display:none;margin-top:16px">
+      <div style="background:var(--surface);border-radius:14px;padding:18px;text-align:center">
+        <!-- Estado: carregando -->
+        <div id="qrLoading" style="display:none;padding:20px 0">
+          <div class="pix-spinner"></div>
+          <div style="font-size:0.82rem;color:var(--text2);margin-top:10px">Gerando seu PIX...</div>
+        </div>
+        <!-- Estado: QR pronto -->
+        <div id="qrReady" style="display:none">
+          <div style="font-size:0.72rem;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">Escaneie o QR Code</div>
+          <div style="background:#fff;padding:8px;border-radius:10px;display:inline-block;margin-bottom:12px">
+            <img id="qrCodeImg" src="" alt="QR Code PIX" style="width:180px;height:180px;display:block">
+          </div>
+          <div style="font-size:0.72rem;color:var(--text2);margin-bottom:6px">ou use o código Copia e Cola:</div>
+          <div id="qrCode" style="font-size:0.62rem;color:var(--green);word-break:break-all;padding:10px;background:var(--surface2);border-radius:8px;max-height:60px;overflow:hidden;text-overflow:ellipsis"></div>
+          <button class="btn btn-primary" style="margin-top:10px;width:100%" onclick="copiarPix()">📋 Copiar código PIX</button>
+          <!-- Timer 5 minutos -->
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;padding:8px;background:var(--surface2);border-radius:8px">
+            <span style="font-size:0.8rem">⏳</span>
+            <span style="font-size:0.8rem;color:var(--text2)">Expira em</span>
+            <span id="pixTimer" style="font-family:'DM Mono',monospace;font-size:0.95rem;font-weight:700;color:var(--gold)">05:00</span>
+          </div>
+          <!-- Status aguardando -->
+          <div id="qrStatusMsg" style="font-size:0.75rem;color:var(--text2);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px">
+            <span class="pix-dot-anim"></span> Aguardando pagamento...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup de pagamento aprovado -->
+    <div id="pixSuccessPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+      <div style="background:var(--surface);border:2px solid var(--green);border-radius:24px;padding:40px 32px;text-align:center;max-width:320px;width:90%;animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275)">
+        <div id="pixSuccessIcon" style="font-size:4rem;margin-bottom:12px">✅</div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--green);margin-bottom:6px">PAGAMENTO APROVADO</div>
+        <div style="font-size:0.85rem;color:var(--text2);margin-bottom:20px">Seu saldo foi creditado!</div>
+        <div style="font-family:'DM Mono',monospace;font-size:2rem;font-weight:700;color:#fff;margin-bottom:6px">
+          <span style="font-size:1rem;font-weight:300;color:rgba(255,255,255,0.5)">R$ </span><span id="pixSuccessAmount">0,00</span>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text2);margin-bottom:24px">creditado na sua carteira</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:var(--surface2);border-radius:10px;padding:10px;font-size:0.8rem;color:var(--text2)">
+            💰 Novo saldo: <strong style="color:var(--green);font-family:'DM Mono',monospace" id="pixNewBalance">R$ 0,00</strong>
+          </div>
+          <button class="btn btn-gold" style="width:100%;padding:12px;font-size:0.9rem" onclick="fecharPixSuccess()">🎰 Jogar Agora!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- GAME PAGE -->
+<div id="gamePage" style="display:none;position:fixed;inset:0;z-index:500;background:#000;flex-direction:column">
+  <div style="position:absolute;top:12px;right:12px;z-index:501">
+    <button onclick="closeGame()" style="background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.2);color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)">✕</button>
+  </div>
+  <iframe id="gameFrame" src="" style="flex:1;width:100%;height:100%;border:none" allowfullscreen></iframe>
+</div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────
+const API = '/api'; // Trocar pelo domínio em produção
+const TELEGRAM_URL = 'https://t.me/SEU_TELEGRAM_AQUI'; // ← TROCAR
+const SUPORTE_URL  = 'https://t.me/SEU_SUPORTE_AQUI';  // ← TROCAR
+let token = localStorage.getItem('chinabet_token');
+
+// ── GAMES ──────────────────────────────────────────────────
+const GAMES = [
+  {id:'126',name:'Fortune Tiger',img:'https://imagensfivers.com/Games/Pgsoft/126.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'98',name:'Fortune Ox',img:'https://imagensfivers.com/Games/Pgsoft/98.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'1695365',name:'Fortune Dragon',img:'https://imagensfivers.com/Games/Pgsoft/1695365.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'1543462',name:'Fortune Rabbit',img:'https://imagensfivers.com/Games/Pgsoft/1543462.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'68',name:'Fortune Mouse',img:'https://imagensfivers.com/Games/Pgsoft/68.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'69',name:'Bikini Paradise',img:'https://imagensfivers.com/Games/Pgsoft/69.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'40',name:'Jungle Delight',img:'https://imagensfivers.com/Games/Pgsoft/40.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'42',name:'Ganesha Gold',img:'https://imagensfivers.com/Games/Pgsoft/42.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'48',name:'Double Fortune',img:'https://imagensfivers.com/Games/Pgsoft/double-fortune.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'63',name:'Dragon Tiger Luck',img:'https://imagensfivers.com/Games/Pgsoft/63.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'104',name:'Muay Thai Champion',img:'https://imagensfivers.com/Games/Pgsoft/104.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'1738001',name:'Chicky Run',img:'https://imagensfivers.com/Games/Pgsoft/1738001.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'1727711',name:'Heist Stakes',img:'https://imagensfivers.com/Games/Pgsoft/1727711.webp',badge:'PG',provider:'PG',cat:'pg',vip:true},
+  {id:'cash-mania',name:'Cash Mania',img:'https://imagensfivers.com/Games/Pgsoft/cash-mania.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'treasures-aztec',name:'Treasures of Aztec',img:'https://imagensfivers.com/Games/Pgsoft/treasures-aztec.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'mahjong-ways2',name:'Mahjong Ways 2',img:'https://imagensfivers.com/Games/Pgsoft/mahjong-ways2.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'dragon-hatch',name:'Dragon Hatch',img:'https://imagensfivers.com/Games/Pgsoft/dragon-hatch.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'dragon-hatch2',name:'Dragon Hatch 2',img:'https://imagensfivers.com/Games/Pgsoft/dragon-hatch2.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'phoenix-rises',name:'Phoenix Rises',img:'https://imagensfivers.com/Games/Pgsoft/phoenix-rises.webp',badge:'PG',provider:'PG',cat:'pg',vip:true},
+  {id:'piggy-gold',name:'Piggy Gold',img:'https://imagensfivers.com/Games/Pgsoft/piggy-gold.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'midas-fortune',name:'Midas Fortune',img:'https://imagensfivers.com/Games/Pgsoft/midas-fortune.webp',badge:'PG',provider:'PG',cat:'pg',vip:true},
+  {id:'1508783',name:'PG Exclusive',img:'https://imagensfivers.com/Games/Pgsoft/1508783.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'1786529',name:'PG Exclusive',img:'https://imagensfivers.com/Games/Pgsoft/1786529.webp',badge:'PG',provider:'PG',cat:'pg',vip:false},
+  {id:'1879752',name:'PG VIP',img:'https://imagensfivers.com/Games/Pgsoft/1879752.webp',badge:'PG',provider:'PG',cat:'pg',vip:true},
+  {id:'vs10vampwolf',name:'Vampire Wolf',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs10vampwolf.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:true},
+  {id:'vs15godsofwar',name:'Gods of War',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs15godsofwar.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:true},
+  {id:'vs20cleocatra',name:'Cleo & Catra',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs20cleocatra.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs20clustcol',name:'Cluster of Cash',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs20clustcol.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs20daydead',name:'Day of Dead',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs20daydead.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs10bbbonanza',name:'Big Bass Bonanza',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs10bbbonanza.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs20sugarrush',name:'Sugar Rush',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs20sugarrush.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs10txbigbass',name:'Big Bass Texas',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs10txbigbass.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs20amuleteg',name:'Amulet of Egypt',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs20amuleteg.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs20bchprty',name:'Beach Party',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs20bchprty.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs20candvil',name:'Candy Village',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs20candvil.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs12bbb',name:'Big Bass Bonanza 2',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs12bbb.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs10cowgold',name:'Cowboy Gold',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs10cowgold.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs10eyestorm',name:'Eye of the Storm',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs10eyestorm.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs10fruity2',name:'Fruity Fruits',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs10fruity2.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs10madame',name:'Madame Destiny',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs10madame.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:true},
+  {id:'vs5luckytig',name:'Lucky Tiger',img:'https://imagensfivers.com/Games/Fatpanda/vs5luckytig.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs20olympgate',name:'Olympic Gates',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs20olympgate.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:true},
+  {id:'vs25mustang',name:'Mustang Gold',img:'https://imagensfivers.com/Games/Pragmatic/vs25mustang.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vswaysbbb',name:'BBB Ways',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vswaysbbb.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs9aztecgemsdx',name:'Aztec Gems Deluxe',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs9aztecgemsdx.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs1masterjoker',name:'Master Joker',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs1masterjoker.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs20hburnhs',name:'Hot to Burn',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs20hburnhs.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+  {id:'vs5joker',name:'Joker King',img:'https://imagensfivers.com/Games/Pragmatic-Play/PP_vs5joker.webp',badge:'PP',provider:'PRAGMATIC',cat:'pragmatic',vip:false},
+];
+
+// ── BANNER ─────────────────────────────────────────────────
+let bIdx=0;
+const bTrack=document.getElementById('bannerTrack');
+const bDots=document.getElementById('bannerDots');
+document.querySelectorAll('.banner').forEach((_,i)=>{
+  const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>goBanner(i);bDots.appendChild(d);
+});
+function goBanner(i){bIdx=i;bTrack.style.transform=`translateX(-${i*100}%)`;document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('active',j===i))}
+let bTotal=3;
+let bannerInterval=setInterval(()=>goBanner((bIdx+1)%bTotal),4000);
+
+// ── JACKPOT ────────────────────────────────────────────────
+let jp=0;
+function tickJp(){
+  const steps=[0.03,0.07,0.11,0.19,0.23,0.31,0.41,0.53,0.67,0.79,0.89,0.97,1.13,1.37,1.61];
+  const v=steps[Math.floor(Math.random()*steps.length)]*(Math.random()>0.12?1:-0.03);
+  jp=Math.max(1600000,jp+v);
+  document.getElementById('jackpotAmount').textContent='R$ '+jp.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  setTimeout(tickJp,400+Math.random()*900);
+}
+tickJp();
+
+// ── CATEGORIES ─────────────────────────────────────────────
+const titles={all:'Popular',pg:'PG Soft',pragmatic:'Pragmatic',vip:'VIP',previsoes:'Previsões',mundial:'Mundial',aovivo:'Ao Vivo'};
+const icons={all:'🔥',pg:'🎮',pragmatic:'🎰',vip:'👑',previsoes:'🔮',mundial:'🌎',aovivo:'🔴'};
+document.querySelectorAll('.cat-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('sectionTitle').textContent=titles[btn.dataset.cat]||btn.dataset.cat;
+    document.getElementById('sectionIcon').textContent=icons[btn.dataset.cat]||'🔥';
+    renderGames(btn.dataset.cat);
+  };
+});
+
+function renderGames(cat){
+  if(cat==='mundial'){renderMundial();return;}
+  const list=cat==='all'?GAMES:cat==='vip'?GAMES.filter(g=>g.vip):GAMES.filter(g=>g.cat===cat);
+  (function(){
+    var grid=document.getElementById('gamesGrid');
+    grid.innerHTML='';
+    list.forEach(function(g){
+      var wrap=document.createElement('div');
+      wrap.className='game-card';
+      wrap.onclick=function(){launchGame(g.provider,g.id);};
+      var img=document.createElement('img');
+      img.className='game-thumb';img.src=g.img;img.alt=g.name;img.loading='lazy';
+      img.onerror=function(){this.style.display='none';this.nextElementSibling.style.display='flex';};
+      var ph=document.createElement('div');
+      ph.className='game-thumb-placeholder';ph.style.display='none';ph.textContent='🎰';
+      var badge=document.createElement('div');
+      badge.className='game-badge';badge.textContent=g.badge;
+      wrap.appendChild(img);wrap.appendChild(ph);wrap.appendChild(badge);
+      grid.appendChild(wrap);
+    });
+  })();
+}
+renderGames('mundial');
+
+// ── DRAWER ─────────────────────────────────────────────────
+function openDrawer(){document.getElementById('drawerOverlay').classList.add('open')}
+function closeDrawer(){document.getElementById('drawerOverlay').classList.remove('open')}
+
+// ── AFILIADO ───────────────────────────────────────────────
+function abrirAfiliado(){
+  closeDrawer();
+  if(!token){openModal('login');showToast('Faça login para ver seu código','error');return}
+  const user=JSON.parse(localStorage.getItem('chinabet_user')||'{}');
+  const code='PB'+String(user.id||'').slice(0,6).toUpperCase()||'PB'+Math.random().toString(36).slice(2,8).toUpperCase();
+  const link=`${location.origin}?ref=${code}`;
+  document.getElementById('affCode').textContent=code;
+  document.getElementById('affLink').textContent=link;
+  document.getElementById('affModal').classList.add('open');
+}
+function fecharAfiliado(){document.getElementById('affModal').classList.remove('open')}
+function copiarCodigo(){navigator.clipboard.writeText(document.getElementById('affCode').textContent).then(()=>showToast('Código copiado! ✅','success'))}
+function copiarLink(){navigator.clipboard.writeText(document.getElementById('affLink').textContent).then(()=>showToast('Link copiado! ✅','success'))}
+
+// ── GAME LAUNCH ────────────────────────────────────────────
+async function launchGame(provider,gameCode){
+  if(!token){openModal('login');showToast('Faça login para jogar','error');return}
+  showToast('Carregando '+gameCode+'... 🎰');
+  try{
+    const r=await fetch(`${API}/games/launch`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({provider_code:provider,game_code:gameCode,lang:'pt'})});
+    const d=await r.json();
+    const url=d.game_url||d.launch_url||d.url||d.data?.url;
+    if(url){
+      document.getElementById('gameFrame').src=url;
+      const gp=document.getElementById('gamePage');
+      gp.style.display='flex';
+      document.body.style.overflow='hidden';
+    } else {
+      showToast('Erro ao abrir jogo: '+(d.msg||d.message||'Sem URL'),'error');
+    }
+  }catch(e){showToast('Servidor offline','error')}
+}
+
+function closeGame(){
+  const gp=document.getElementById('gamePage');
+  gp.style.display='none';
+  document.getElementById('gameFrame').src='';
+  document.body.style.overflow='';
+}
+
+// ── LOGIN ──────────────────────────────────────────────────
+async function doLogin(){
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  if(!user||!pass){showToast('Preencha usuário e senha','error');return}
+  try{
+    const r=await fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})});
+    const d=await r.json();
+    if(r.ok){
+      token=d.token;
+      const userFull = {...d.user, balance: parseFloat(d.user.wallet?.balance ?? d.user.balance ?? 0)};
+      localStorage.setItem('chinabet_token',token);
+      localStorage.setItem('chinabet_user', JSON.stringify(userFull));
+      showToast('Bem-vindo, '+userFull.username+'!','success');
+      closeModal('loginOverlay');
+      updateNavLoggedIn(userFull);
+    }else showToast(d.message||'Credenciais inválidas','error');
+  }catch{showToast('Servidor offline','error')}
+}
+
+function updateNavLoggedIn(user){
+  const bal = parseFloat(user.balance||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('navActions').innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px">
+      <div onclick="openModal('deposit')" style="background:linear-gradient(135deg,rgba(5,150,105,0.15),rgba(5,150,105,0.05));border:1px solid rgba(5,150,105,0.4);border-radius:12px;padding:5px 12px 5px 10px;display:inline-flex;align-items:center;gap:7px;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 2px 12px rgba(5,150,105,0.15),inset 0 1px 0 rgba(255,255,255,0.05)">
+        <div style="display:flex;flex-direction:column;align-items:flex-start">
+          <span style="font-size:0.52rem;color:rgba(255,255,255,0.35);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;line-height:1">Saldo</span>
+          <div style="display:flex;align-items:baseline;gap:3px">
+            <span style="font-size:0.62rem;color:rgba(255,255,255,0.45);font-weight:500;font-family:'DM Mono',monospace">R$</span>
+            <span id="userBalance" style="font-family:'DM Mono',monospace;font-size:0.92rem;font-weight:700;color:#10b981;letter-spacing:0.5px">${bal}</span>
+          </div>
+        </div>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(16,185,129,0.6)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="logout()" title="Sair"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+    </div>
+  `;
+  updateDrawerLoggedIn(user);
+}
+
+function updateDrawerLoggedIn(user){
+  const isAdmin=['ADMIN','SUPERADMIN'].includes(user.role);
+  // Replace drawer header with user card
+  document.getElementById('drawerHead').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;flex:1">
+      <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;box-shadow:0 3px 10px rgba(124,58,237,0.4)">👤</div>
+      <div>
+        <div style="font-weight:800;font-size:0.95rem;color:#fff">@${user.username}</div>
+        <div style="font-size:0.7rem;color:var(--text2);margin-top:1px">${isAdmin?'🔑 Administrador':'Jogador'}</div>
+      </div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>`;
+  // Inject actions below header
+  document.getElementById('drawerUserSection').innerHTML=`
+    ${isAdmin?`<a href="https://pietset.space/admin" target="_blank" onclick="closeDrawer()" style="display:flex;align-items:center;gap:14px;padding:12px 20px;background:linear-gradient(90deg,rgba(124,58,237,0.15),transparent);border-bottom:1px solid rgba(124,58,237,0.2);text-decoration:none">
+      <span style="font-size:1.2rem">🛡️</span>
+      <div><div style="font-weight:700;font-size:0.88rem;color:var(--purple2)">Painel Admin</div><div style="font-size:0.72rem;color:var(--text2)">Gerenciar plataforma</div></div>
+      <span style="margin-left:auto;font-size:0.75rem;color:var(--purple2)">→</span>
+    </a>`:''}`;
+}
+function logout(){token=null;localStorage.removeItem('chinabet_token');localStorage.removeItem('chinabet_user');location.reload()}
+
+// ── REGISTER ───────────────────────────────────────────────
+async function doRegister(){
+  let ok=true;
+  const f=id=>document.getElementById(id).value.trim();
+  const e=(id,msg)=>{const el=document.getElementById('err'+id);if(el)el.textContent=msg;ok=false};
+  ['Name','Cpf','Phone','Email','Pass'].forEach(id=>{const el=document.getElementById('err'+id);if(el)el.textContent=''});
+  if(f('regName').split(' ').length<2)e('Name','Nome completo obrigatório');
+  if(!/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(f('regCpf')))e('Cpf','CPF inválido');
+  if(!/^\(\d{2}\)\s\d{4,5}-\d{4}$/.test(f('regPhone')))e('Phone','Telefone inválido');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f('regEmail')))e('Email','E-mail inválido');
+  if(document.getElementById('regPass').value.length<8)e('Pass','Mínimo 8 caracteres');
+  if(!document.getElementById('acceptTerms').checked){showToast('Aceite os Termos de Uso','error');ok=false}
+  if(!ok)return;
+  const email=f('regEmail');
+  const pass=document.getElementById('regPass').value;
+  const generatedUser=email.split('@')[0].replace(/[^a-zA-Z0-9]/g,'')+Math.floor(Math.random()*999);
+  try{
+    const r=await fetch(`${API}/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:generatedUser,fullName:f('regName'),email:email,cpf:f('regCpf'),phone:f('regPhone'),password:pass})});
+    const d=await r.json();
+    if(r.ok){
+      showToast('🎉 Conta criada! Entrando...','success');
+      closeModal('registerOverlay');
+      // Auto login after register
+      const lr=await fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:email,password:pass})});
+      const ld=await lr.json();
+      if(lr.ok){
+        token=ld.token;
+        localStorage.setItem('chinabet_token',token);
+        localStorage.setItem('chinabet_user',JSON.stringify(ld.user));
+        updateNavLoggedIn(ld.user);
+        showToast('✅ Bem-vindo, '+ld.user.username+'!','success');
+      }
+    }
+    else showToast(Object.values(d.errors||{}).flat()[0]||d.message||'Erro ao cadastrar','error');
+  }catch{showToast('Servidor offline','error')}
+}
+
+// ── PIX ────────────────────────────────────────────────────
+let pixPollingInterval = null;
+let pixTimerInterval   = null;
+let currentPixCode     = '';
+let currentPaymentId   = '';
+
+async function gerarPix(){
+  if(!token){openModal('login');showToast('Faça login primeiro','error');return}
+  const rawAmount=document.getElementById('depAmount').value.replace(/[^0-9,]/g,'').replace(',','.');
+  const amount=parseFloat(rawAmount);
+  if(!amount||amount<10){showToast('Valor mínimo R$ 10,00','error');return}
+
+  // Mostra área com loading
+  document.getElementById('qrArea').style.display='block';
+  document.getElementById('qrLoading').style.display='block';
+  document.getElementById('qrReady').style.display='none';
+
+  try{
+    const r=await fetch(`${API}/payments/pix/create`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({amount:amount.toFixed(2)})
+    });
+    const d=await r.json();
+    if(!r.ok){showToast(d.message||'Erro ao gerar PIX','error');document.getElementById('qrArea').style.display='none';return}
+
+    currentPaymentId = d.paymentId;
+    currentPixCode   = d.pixCode;
+
+    // Exibe QR Code
+    document.getElementById('qrLoading').style.display='none';
+    document.getElementById('qrReady').style.display='block';
+    document.getElementById('qrCodeImg').src = 'data:image/png;base64,' + d.qrCodeImage;
+    document.getElementById('qrCode').textContent = d.pixCode;
+
+    showToast('QR Code gerado! Pague em até 5 minutos ✅','success');
+
+    // Inicia countdown 5 minutos
+    iniciarTimer(5 * 60);
+
+    // Inicia polling de status
+    iniciarPolling(d.paymentId);
+
+  }catch(e){
+    document.getElementById('qrArea').style.display='none';
+    showToast('Erro ao gerar PIX','error');
+  }
+}
+
+function iniciarTimer(segundosTotais){
+  if(pixTimerInterval) clearInterval(pixTimerInterval);
+  let seg = segundosTotais;
+  const el = document.getElementById('pixTimer');
+  function tick(){
+    const m = String(Math.floor(seg/60)).padStart(2,'0');
+    const s = String(seg%60).padStart(2,'0');
+    if(el) el.textContent = m+':'+s;
+    if(seg <= 60 && el) el.classList.add('pix-timer-red');
+    if(seg <= 0){
+      clearInterval(pixTimerInterval);
+      pararPolling();
+      const statusMsg = document.getElementById('qrStatusMsg');
+      if(statusMsg) statusMsg.innerHTML='⚠️ PIX expirado. Gere um novo.';
+    }
+    seg--;
+  }
+  tick();
+  pixTimerInterval = setInterval(tick, 1000);
+}
+
+function iniciarPolling(paymentId){
+  if(pixPollingInterval) clearInterval(pixPollingInterval);
+  pixPollingInterval = setInterval(async ()=>{
+    try{
+      const r = await fetch(`${API}/payments/pix/${paymentId}/status`,{
+        headers:{'Authorization':'Bearer '+token}
+      });
+      if(!r.ok) return;
+      const d = await r.json();
+      if(d.status === 'PAID'){
+        pararPolling();
+        mostrarPixSuccess(d.balance);
+      }
+    }catch(e){}
+  }, 4000);
+}
+
+function pararPolling(){
+  if(pixPollingInterval) clearInterval(pixPollingInterval);
+  if(pixTimerInterval)   clearInterval(pixTimerInterval);
+  pixPollingInterval = null;
+  pixTimerInterval   = null;
+}
+
+function mostrarPixSuccess(novoSaldo){
+  // Fecha modal de depósito
+  closeModal('depositOverlay');
+
+  // Pega o valor pago do input
+  const rawAmount = document.getElementById('depAmount').value.replace(/[^0-9,]/g,'').replace(',','.');
+  const valorPago = parseFloat(rawAmount)||0;
+
+  // Atualiza saldo na navbar
+  const bal = parseFloat(novoSaldo||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const balEl = document.getElementById('userBalance');
+  if(balEl) balEl.textContent = bal;
+  const modalBalEl = document.getElementById('modalBalance');
+  if(modalBalEl) modalBalEl.textContent = bal;
+
+  // Mostra popup de sucesso
+  document.getElementById('pixSuccessAmount').textContent = valorPago.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('pixNewBalance').textContent = 'R$ ' + bal;
+  const popup = document.getElementById('pixSuccessPopup');
+  popup.style.display = 'flex';
+
+  // Pequena animação no ícone
+  let frame = 0;
+  const icons = ['✅','💰','✅','🎉'];
+  const iconEl = document.getElementById('pixSuccessIcon');
+  const anim = setInterval(()=>{ if(iconEl) iconEl.textContent=icons[frame%icons.length]; frame++; if(frame>8) clearInterval(anim); },250);
+}
+
+function fecharPixSuccess(){
+  document.getElementById('pixSuccessPopup').style.display='none';
+}
+
+function copiarPix(){
+  navigator.clipboard.writeText(currentPixCode||document.getElementById('qrCode').textContent)
+    .then(()=>showToast('Código PIX copiado! ✅','success'));
+}
+
+// ── HELPERS ────────────────────────────────────────────────
+function maskDepAmount(i){
+  let v=i.value.replace(/[^0-9]/g,'');
+  if(!v){i.value='';return}
+  v=(parseInt(v)/100).toFixed(2);
+  i.value=v.replace('.',',');
+}
+function maskCPF(i){let v=i.value.replace(/\D/g,'').slice(0,11);v=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');i.value=v}
+function maskPhone(i){let v=i.value.replace(/\D/g,'').slice(0,11);v=v.length<=10?v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{4})(\d)/,'$1-$2'):v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2');i.value=v}
+function togglePass(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈'}
+function setDepValue(btn,v){const fmt=(v).toFixed(2).replace('.',',');document.getElementById('depAmount').value=fmt;document.querySelectorAll('.dep-value').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected')}
+function openModal(t){if(t==='profile'){openProfileModal();return;}document.getElementById(t+'Overlay').classList.add('open');document.body.style.overflow='hidden';document.body.style.position='fixed';document.body.style.width='100%';document.body.dataset.scrollY=window.scrollY}
+function closeModal(id){document.getElementById(id).classList.remove('open');var anyOpen=document.querySelectorAll('.overlay.open').length>0;if(!anyOpen){document.body.style.overflow='';document.body.style.position='';document.body.style.width='';window.scrollTo(0,parseInt(document.body.dataset.scrollY||0))}}
+function closeOverlay(e,id){if(e.target.id===id)closeModal(id)}
+function switchAuthTab(t){closeModal('loginOverlay');closeModal('registerOverlay');setTimeout(()=>openModal(t),10)}
+function setTab(el){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active')}
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',3500)}
+
+// ── LOAD SITE SETTINGS ────────────────────────────────────
+async function loadSiteSettings(){
+  // 1. Aplica cache do localStorage instantaneamente (sem flash)
+  try{
+    const cached=localStorage.getItem('chinabet_settings');
+    if(cached) applySiteSettings(JSON.parse(cached));
+  }catch(e){}
+  // 2. Busca dados frescos do servidor
+  try{
+    const r=await fetch(`${API}/public/settings`,{cache:'no-store'});
+    if(!r.ok)return;
+    const d=await r.json();
+    try{localStorage.setItem('chinabet_settings',JSON.stringify(d));}catch(e){}
+    applySiteSettings(d);
+  }catch(e){}
+}
+
+function applySiteSettings(d){
+  try{
+    if(d.site_name){
+      document.title=d.site_name;
+      document.querySelector('.logo').innerHTML=`<span class="logo-progress">${d.site_name.slice(0,Math.ceil(d.site_name.length/2))}</span><span class="logo-bet">${d.site_name.slice(Math.ceil(d.site_name.length/2))}</span>`;
+      document.querySelector('.drawer-logo').innerHTML=`<span style="color:var(--green)">${d.site_name.slice(0,Math.ceil(d.site_name.length/2))}</span><span style="color:#fff">${d.site_name.slice(Math.ceil(d.site_name.length/2))}</span>`;
+    }
+    // Load jackpot match
+    if(d.jackpot_flag1){
+      const f1=document.getElementById('jmFlag1');
+      const p1=document.getElementById('jmFlag1Ph');
+      f1.src=d.jackpot_flag1;f1.style.display='block';p1.style.display='none';
+    }
+    if(d.jackpot_flag2){
+      const f2=document.getElementById('jmFlag2');
+      const p2=document.getElementById('jmFlag2Ph');
+      f2.src=d.jackpot_flag2;f2.style.display='block';p2.style.display='none';
+    }
+    if(d.jackpot_match_date) document.getElementById('jackpotMatchDate').textContent=d.jackpot_match_date;
+    if(d.jackpot_amount){jp=parseFloat(d.jackpot_amount)||jp;document.getElementById('jackpotAmount').textContent='R$ '+jp.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+    if(Array.isArray(d.home_banners)&&d.home_banners.length>0){
+      const track=document.getElementById('bannerTrack');
+      const dotsEl=document.getElementById('bannerDots');
+      const colors=['banner-1','banner-2','banner-3'];
+      track.innerHTML=d.home_banners.map(function(b,i){
+        var bg=b.image?'background:linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),url('+b.image+') center/cover no-repeat':'';
+        var onclick=b.link?'window.open(this.dataset.link,\'_blank\')':'';
+        return '<div class="banner '+colors[i%3]+'" style="'+bg+'" data-link="'+(b.link||'')+'" onclick="'+onclick+'">'
+          +'<div><div class="banner-tag">Destaque</div><div class="banner-title">'+b.title+'</div></div>'
+          +'</div>';
+      }).join('');
+      dotsEl.innerHTML='';
+      d.home_banners.forEach(function(_,i){var dd=document.createElement('div');dd.className='dot'+(i===0?' active':'');dd.onclick=function(){goBanner(i);};dotsEl.appendChild(dd);});
+      bTotal=d.home_banners.length;
+      bIdx=0;
+      goBanner(0);
+      clearInterval(bannerInterval);
+      bannerInterval=setInterval(function(){goBanner((bIdx+1)%bTotal);},4000);
+    }
+  }catch(e){}
+}
+// Chamar antes de qualquer outra coisa para minimizar flash
+loadSiteSettings();
+
+// ── AUTO OPEN REGISTER ─────────────────────────────────────
+if(!token){
+  setTimeout(()=>openModal('register'), 800);
+}
+
+// ── AUTO LOGIN ─────────────────────────────────────────────
+if(token){
+  fetch(`${API}/auth/me`,{headers:{'Authorization':'Bearer '+token}})
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{if(d){localStorage.setItem('chinabet_user',JSON.stringify(d));const u={username:d.username,balance:parseFloat(d.wallet?.balance??d.balance??0),role:d.role};updateNavLoggedIn(u)}})
+    .catch(()=>{});
+}
+
+// ── REF CODE ───────────────────────────────────────────────
+const ref=new URLSearchParams(location.search).get('ref');
+const refEl=document.getElementById('regAfiliado');if(ref&&refEl)refEl.value=ref;
+
+// ── MUNDIAL — Mercado de Previsões ─────────────────────────
+let mundialBets = [];
+let betSheetData = {};
+
+function buildBetButtons(bet, isClosed) {
+  const isEscolha = bet.simLabel !== 'SIM' && bet.naoLabel !== 'NÃO' && bet.simLabel !== 'NÃO';
+  const dis = isClosed ? 'disabled' : '';
+  if (isEscolha) {
+    return '<div class="mundial-btns" style="grid-template-columns:1fr 1fr;gap:10px">'
+      + '<button class="btn-sim ' + (isClosed ? 'btn-sim-closed' : '') + '" style="font-size:0.82rem;padding:12px 8px;flex-direction:column;gap:3px" '
+      + dis + ' onclick="openBetSheet(\'' + bet.id + '\',\'sim\',null,' + bet.simOdd + ',\'' + bet.simLabel + '\')">'
+      + '<span style="font-weight:800">' + bet.simLabel + '<\/span>'
+      + '<span style="font-size:0.7rem;opacity:0.8">\u00d7' + bet.simOdd.toFixed(2) + '<\/span>'
+      + '<\/button>'
+      + '<button class="btn-nao ' + (isClosed ? 'btn-nao-closed' : '') + '" style="font-size:0.82rem;padding:12px 8px;flex-direction:column;gap:3px" '
+      + dis + ' onclick="openBetSheet(\'' + bet.id + '\',\'nao\',null,' + bet.naoOdd + ',\'' + bet.naoLabel + '\')">'
+      + '<span style="font-weight:800">' + bet.naoLabel + '<\/span>'
+      + '<span style="font-size:0.7rem;opacity:0.8">\u00d7' + bet.naoOdd.toFixed(2) + '<\/span>'
+      + '<\/button>'
+      + '<\/div>';
+  }
+  return '<div class="mundial-btns">'
+    + '<button class="btn-sim ' + (isClosed ? 'btn-sim-closed' : '') + '" '
+    + dis + ' onclick="openBetSheet(\'' + bet.id + '\',\'sim\',null,' + bet.simOdd + ',\'' + bet.simLabel + '\')">'
+    + bet.simLabel + ' \u00d7' + bet.simOdd.toFixed(2)
+    + '<\/button>'
+    + '<button class="btn-nao ' + (isClosed ? 'btn-nao-closed' : '') + '" '
+    + dis + ' onclick="openBetSheet(\'' + bet.id + '\',\'nao\',null,' + bet.naoOdd + ',\'' + bet.naoLabel + '\')">'
+    + bet.naoLabel + ' \u00d7' + bet.naoOdd.toFixed(2)
+    + '<\/button>'
+    + '<\/div>';
+}
+
+async function renderMundial() {
+  const grid = document.getElementById('gamesGrid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Carregando apostas...</div>';
+  try {
+    const r = await fetch(`${API}/public/mundial`);
+    if (!r.ok) throw new Error();
+    mundialBets = await r.json();
+  } catch {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Nenhuma aposta disponível</div>';
+    return;
+  }
+
+  if (!mundialBets.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Nenhuma aposta disponível no momento</div>';
+    return;
+  }
+
+  // Switch grid to single column for mundial cards
+  grid.style.gridTemplateColumns = '1fr';
+  grid.innerHTML = mundialBets.map(bet => buildMundialCard(bet)).join('');
+}
+
+function buildMundialCard(bet) {
+  const sim = Math.round(bet.simPercent);
+  const nao = 100 - sim;
+  const isClosed = bet.status !== 'OPEN';
+
+  const optsSim = (bet.options || []).filter(o => o.side === 'sim');
+  const optsNao = (bet.options || []).filter(o => o.side === 'nao');
+  const hasOpts = optsSim.length + optsNao.length > 0;
+
+  const optHtml = hasOpts ? `
+    <button class="mundial-expand-btn" onclick="toggleMundialOpts(this)">
+      <span class="chevron">▼</span>&nbsp;Mais opções
+    </button>
+    <div class="mundial-options">
+      ${optsSim.map(o => `
+        <button class="mundial-opt-btn" onclick="openBetSheet('${bet.id}','sim','${o.id}',${o.multiplier},'${o.label}')">
+          <span class="mundial-opt-label">${o.label}</span>
+          <span class="mundial-opt-odd opt-sim-color">×${o.multiplier.toFixed(2)}</span>
+        </button>`).join('')}
+      ${optsNao.map(o => `
+        <button class="mundial-opt-btn" onclick="openBetSheet('${bet.id}','nao','${o.id}',${o.multiplier},'${o.label}')">
+          <span class="mundial-opt-label">${o.label}</span>
+          <span class="mundial-opt-odd opt-nao-color">×${o.multiplier.toFixed(2)}</span>
+        </button>`).join('')}
+    </div>` : '';
+
+  return `
+    <div class="mundial-card">
+      ${bet.imageData
+        ? `<img class="mundial-img" src="${bet.imageData}" alt="${bet.title}">`
+        : `<div class="mundial-img-placeholder">🌎</div>`}
+      <div class="mundial-body">
+        <div class="mundial-title">${bet.title}</div>
+        <div class="mundial-desc">${bet.description}</div>
+        <div class="mundial-bar-wrap">
+          <div class="mundial-bar-sim" style="width:${sim}%"></div>
+          <div class="mundial-bar-nao" style="width:${nao}%"></div>
+        </div>
+        <div class="mundial-bar-labels">
+          <span style="color:#059669">✔ ${bet.simLabel} ${sim}%</span>
+          <span style="color:#dc2626">${bet.naoLabel} ${nao}% ✖</span>
+        </div>
+        ${buildBetButtons(bet, isClosed)}
+        ${optHtml}
+      </div>
+    </div>`;
+}
+
+function toggleMundialOpts(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+// ── BET SHEET ───────────────────────────────────────────────
+function openBetSheet(betId, side, optionId, odd, label) {
+  if (!token) { openModal('login'); showToast('Faça login para apostar','error'); return; }
+  const bet = mundialBets.find(b => b.id === betId);
+  if (!bet) return;
+
+  betSheetData = { betId, side, optionId, odd };
+  document.getElementById('betSheetTitle').textContent = bet.title;
+  document.getElementById('betSheetSub').textContent = label;
+  document.getElementById('betSheetOdd').textContent = `×${odd.toFixed(2)}`;
+  document.getElementById('betSheetOdd').style.color = side === 'sim' ? '#059669' : '#dc2626';
+  document.getElementById('betAmountInput').value = '';
+  document.getElementById('betPotential').textContent = 'R$ 0,00';
+  document.querySelectorAll('.bet-amount-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('betSheet').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeBetSheet() {
+  document.getElementById('betSheet').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function closeBetSheetOutside(e) {
+  if (e.target.id === 'betSheet') closeBetSheet();
+}
+
+function setBetAmount(val) {
+  document.getElementById('betAmountInput').value = val.toFixed(2).replace('.',',');
+  document.querySelectorAll('.bet-amount-chip').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  updatePotential();
+}
+
+function updatePotential() {
+  const raw = document.getElementById('betAmountInput').value.replace(/[^0-9,]/g,'').replace(',','.');
+  const amount = parseFloat(raw) || 0;
+  const win = (amount * (betSheetData.odd || 1)).toFixed(2);
+  document.getElementById('betPotential').textContent = 'R$ ' + parseFloat(win).toLocaleString('pt-BR',{minimumFractionDigits:2});
+}
+
+async function confirmBet() {
+  const raw = document.getElementById('betAmountInput').value.replace(/[^0-9,]/g,'').replace(',','.');
+  const amount = parseFloat(raw);
+  if (!amount || amount < 1) { showToast('Valor mínimo R$ 1,00','error'); return; }
+
+  // Verificar saldo via API
+  let saldo = 0;
+  const userStr = localStorage.getItem('chinabet_user');
+  const userObj = userStr ? JSON.parse(userStr) : {};
+  try {
+    const balR = await fetch(`${API}/auth/me`, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (balR.ok) {
+      const balD = await balR.json();
+      saldo = parseFloat(balD.balance || balD.wallet?.balance || 0);
+      if (userObj) { userObj.balance = saldo; localStorage.setItem('chinabet_user', JSON.stringify(userObj)); }
+      const el = document.getElementById('userBalance');
+      if (el) el.textContent = saldo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+  } catch { saldo = parseFloat(userObj.balance || 0); }
+  if (amount > saldo) {
+    closeBetSheet();
+    showInsufficientBalanceModal(amount, saldo);
+    return;
+  }
+
+  const btn = document.getElementById('confirmBetBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Processando...'; }
+
+  try {
+    const r = await fetch(`${API}/mundial/bet`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        betId   : betSheetData.betId,
+        optionId: betSheetData.optionId || undefined,
+        side    : betSheetData.side,
+        amount  : amount.toFixed(2),
+      }),
+    });
+    const d = await r.json();
+    if (r.ok) {
+      closeBetSheet();
+      showToast('Aposta realizada! Ganho potencial: R$ '+parseFloat(d.potentialWin).toLocaleString('pt-BR',{minimumFractionDigits:2}),'success');
+      const bal = parseFloat(d.newBalance||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      const el = document.getElementById('userBalance');
+      if (el) el.textContent = bal;
+      const mel = document.getElementById('modalBalance');
+      if (mel) mel.textContent = bal;
+      if (userObj) { userObj.balance = d.newBalance || 0; localStorage.setItem('chinabet_user', JSON.stringify(userObj)); }
+    } else {
+      if (d.message && d.message.toLowerCase().includes('saldo')) {
+        closeBetSheet();
+        showInsufficientBalanceModal(amount, saldo);
+      } else {
+        showToast(d.message || 'Erro ao apostar','error');
+      }
+    }
+  } catch { showToast('Servidor offline','error'); }
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Confirmar Aposta'; }
+}
+
+function showInsufficientBalanceModal(valorAposta, saldoAtual) {
+  const falta = (valorAposta - saldoAtual).toFixed(2);
+  const el = document.createElement('div');
+  el.id = 'insufficientModal';
+  el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px);padding:20px';
+  el.innerHTML = `
+    <div style="background:linear-gradient(160deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04));backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:32px 24px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+      <div style="width:56px;height:56px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;margin-bottom:6px">Saldo Insuficiente</div>
+      <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:10px;line-height:1.5">Você precisa de mais <strong style="color:#fff">R$ ${parseFloat(falta).toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong> para fazer esta aposta</div>
+      <div style="font-family:'Inter',sans-serif;font-size:0.78rem;color:rgba(245,158,11,0.8);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.5">Você precisa ter depositado no mínimo <strong style="color:#f59e0b">R$ 150,00</strong> para fazer a sua primeira aposta.</div>
+      <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:0.75rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif">Saldo atual</span>
+          <span style="font-size:0.75rem;color:#fff;font-family:'DM Mono',monospace;font-weight:700">R$ ${parseFloat(saldoAtual).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-size:0.75rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif">Valor da aposta</span>
+          <span style="font-size:0.75rem;color:#ef4444;font-family:'DM Mono',monospace;font-weight:700">R$ ${parseFloat(valorAposta).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px;font-size:0.65rem;color:rgba(255,255,255,0.3);font-family:'Inter',sans-serif;letter-spacing:0.5px">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(16,185,129,0.6)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        DEPÓSITO SEGURO VIA PIX
+      </div>
+      <button onclick="document.getElementById('insufficientModal').remove();openModal('deposit')" style="width:100%;padding:15px;background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:14px;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;box-shadow:0 4px 20px rgba(5,150,105,0.4);margin-bottom:8px">
+        Depositar agora
+      </button>
+      <button onclick="document.getElementById('insufficientModal').remove()" style="width:100%;padding:11px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;color:rgba(255,255,255,0.6);font-family:'Inter',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer">
+        Cancelar
+      </button>
+    </div>
+  `;
+  document.body.appendChild(el);
+}
+
+async function showSaqueModal() {
+  let minValor = 150;
+  let saqueLib = false;
+  let saldoAtual = 0;
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (r.ok) {
+      const u = await r.json();
+      minValor = parseFloat(u.minSaqueRequerido || 150);
+      saqueLib = !!u.saqueLiberad;
+      saldoAtual = parseFloat(u.wallet?.balance ?? u.balance ?? 0);
+    }
+  } catch {}
+
+  if (!saqueLib) {
+    const minFmt = minValor.toLocaleString('pt-BR', {minimumFractionDigits:2});
+    const el = document.createElement('div');
+    el.id = 'saqueModal';
+    el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px);padding:20px';
+    el.innerHTML = `
+      <div style="background:linear-gradient(160deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04));backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:32px 24px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+        <div style="width:56px;height:56px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;margin-bottom:10px">Saque não disponível</div>
+        <div style="font-family:'Inter',sans-serif;font-size:0.88rem;color:rgba(255,255,255,0.6);margin-bottom:24px;line-height:1.6">Você precisa depositar no mínimo <strong style="color:#fff">R$ ${minFmt}</strong> para fazer o primeiro saque.</div>
+        <button onclick="document.getElementById('saqueModal').remove();openModal('deposit')" style="width:100%;padding:15px;background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:14px;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;box-shadow:0 4px 20px rgba(5,150,105,0.4);margin-bottom:8px">Depositar agora</button>
+        <button onclick="document.getElementById('saqueModal').remove()" style="width:100%;padding:11px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;color:rgba(255,255,255,0.6);font-family:'Inter',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer">Fechar</button>
+      </div>
+    `;
+    document.body.appendChild(el);
+    return;
+  }
+
+  const saldoFmt = saldoAtual.toLocaleString('pt-BR', {minimumFractionDigits:2});
+  const el = document.createElement('div');
+  el.id = 'saqueModal';
+  el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(12px)';
+  el.innerHTML = `
+    <div style="background:linear-gradient(160deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03));backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.15);border-top-left-radius:28px;border-top-right-radius:28px;padding:28px 24px 40px;width:100%;max-width:440px;box-shadow:0 -8px 40px rgba(0,0,0,0.4)">
+      <div style="width:36px;height:3px;background:rgba(255,255,255,0.3);border-radius:2px;margin:0 auto 24px"></div>
+      <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:1.05rem;color:#fff;margin-bottom:4px;text-align:center">Solicitar Saque</div>
+      <div style="font-family:'Inter',sans-serif;font-size:0.75rem;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:20px">Saldo disponível: <strong style="color:#10b981">R$ ${saldoFmt}</strong></div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:0.72rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif;font-weight:600;letter-spacing:0.5px;display:block;margin-bottom:6px">VALOR DO SAQUE (R$)</label>
+        <input id="saqueValor" type="number" min="20" max="${saldoAtual}" placeholder="Mínimo R$ 20,00" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:14px;color:#fff;font-family:'DM Mono',monospace;font-size:1rem;box-sizing:border-box;outline:none">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:0.72rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif;font-weight:600;letter-spacing:0.5px;display:block;margin-bottom:6px">CHAVE PIX</label>
+        <input id="saquePixKey" type="text" placeholder="CPF, e-mail, telefone ou chave aleatória" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:14px;color:#fff;font-family:'Inter',sans-serif;font-size:0.9rem;box-sizing:border-box;outline:none">
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;padding:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(16,185,129,0.7)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-family:'Inter',sans-serif;letter-spacing:0.5px">PAGAMENTO SEGURO · ANTIFRAUDE ATIVO</span>
+      </div>
+      <button onclick="submitSaque(${saldoAtual})" style="width:100%;padding:15px;background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:14px;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;box-shadow:0 4px 20px rgba(5,150,105,0.4);margin-bottom:8px">Confirmar Saque</button>
+      <button onclick="document.getElementById('saqueModal').remove()" style="width:100%;padding:11px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;color:rgba(255,255,255,0.6);font-family:'Inter',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer">Cancelar</button>
+    </div>
+  `;
+  document.body.appendChild(el);
+}
+
+async function submitSaque(saldoMax) {
+  const valor = parseFloat(document.getElementById('saqueValor').value);
+  const pixKey = document.getElementById('saquePixKey').value.trim();
+  if (!valor || valor < 20) { alert('Valor mínimo de saque: R$ 20,00'); return; }
+  if (valor > saldoMax) { alert('Saldo insuficiente'); return; }
+  if (!pixKey) { alert('Informe sua chave PIX'); return; }
+  try {
+    const r = await fetch(`${API}/webhooks/pix/withdraw`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ amount: valor.toFixed(2), pixKey })
+    });
+    const d = await r.json();
+    document.getElementById('saqueModal').remove();
+    if (r.ok) {
+      const conf = document.createElement('div');
+      conf.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px);padding:20px';
+      conf.innerHTML = `
+        <div style="background:linear-gradient(160deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04));backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:32px 24px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5)">
+          <div style="width:56px;height:56px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;margin-bottom:10px">Saque Solicitado!</div>
+          <div style="font-family:'Inter',sans-serif;font-size:0.88rem;color:rgba(255,255,255,0.6);margin-bottom:16px;line-height:1.6">Seu saque de <strong style="color:#10b981">R$ ${valor.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong> foi registrado.</div>
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;margin-bottom:20px;font-size:0.82rem;color:rgba(255,255,255,0.5);font-family:'Inter',sans-serif;line-height:1.6">O valor cairá via PIX em até <strong style="color:#fff">40 minutos</strong>. Nossa equipe antifraude irá verificar a transação antes do envio.</div>
+          <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;padding:13px;background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:14px;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer">Entendido</button>
+        </div>
+      `;
+      document.body.appendChild(conf);
+      const navEl = document.getElementById('userBalance');
+      if (navEl) navEl.textContent = (saldoMax - valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    } else {
+      alert(d.message || 'Erro ao solicitar saque');
+    }
+  } catch { alert('Erro de conexão'); }
+}
+
+// ── PROFILE ─────────────────────────────────────────────────
+async function openProfileModal() {
+  if (!token) { openModal('login'); return; }
+  document.getElementById('profileOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Busca dados atualizados da API
+  let user = JSON.parse(localStorage.getItem('chinabet_user') || '{}');
+  try {
+    const r = await fetch(`${API}/auth/me`, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (r.ok) {
+      const fresh = await r.json();
+      user = { ...user, ...fresh, balance: parseFloat(fresh.wallet?.balance ?? fresh.balance ?? 0) };
+      localStorage.setItem('chinabet_user', JSON.stringify(user));
+      // Atualiza saldo na navbar também
+      const navEl = document.getElementById('userBalance');
+      if (navEl) navEl.textContent = user.balance.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+  } catch {}
+
+  const bal  = parseFloat(user.balance || 0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const initial = (user.fullName || user.username || '?')[0].toUpperCase();
+
+  document.getElementById('profileContent').innerHTML = `
+    <div class="profile-avatar">${initial}</div>
+    <div class="profile-name">${user.fullName || user.username}</div>
+    <div class="profile-user">@${user.username}</div>
+    <div class="profile-balance-card">
+      <div style="font-size:0.68rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">Saldo disponível</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:1.7rem;font-weight:700;color:var(--text1);letter-spacing:0.02em">R$ <span id="profileBalance">${bal}</span></div>
+    </div>
+    <div class="profile-actions">
+      <button class="btn btn-gold" style="padding:12px;font-size:0.88rem" onclick="closeModal('profileOverlay');openModal('deposit')">💳 Depositar</button>
+      <button class="btn btn-outline" style="padding:12px;font-size:0.88rem" onclick="closeModal('profileOverlay');showSaqueModal()">💸 Sacar</button>
+    </div>
+    <div style="font-weight:700;font-size:0.9rem;color:#fff;margin-bottom:10px">📋 Histórico de Apostas</div>
+    <div id="profileBetList"><div style="text-align:center;color:var(--text2);padding:20px">Carregando...</div></div>
+  `;
+
+  // Load bet history
+  try {
+    const r = await fetch(`${API}/mundial/my-bets`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const bets = await r.json();
+    const el = document.getElementById('profileBetList');
+    if (!bets.length) {
+      el.innerHTML = '<div style="text-align:center;color:var(--text2);padding:20px">Nenhuma aposta ainda</div>';
+      return;
+    }
+    el.innerHTML = bets.map(b => {
+      const statusMap = {PENDING:'⏳ Pendente',WON:'✅ Ganhou',LOST:'❌ Perdeu',CANCELLED:'↩ Cancelado'};
+      const statusClass = {PENDING:'pbs-pending',WON:'pbs-won',LOST:'pbs-lost',CANCELLED:'pbs-cancelled'};
+      const amount = parseFloat(b.amount).toLocaleString('pt-BR',{minimumFractionDigits:2});
+      const potential = parseFloat(b.potentialWin).toLocaleString('pt-BR',{minimumFractionDigits:2});
+      return `
+        <div class="profile-bet-item">
+          <span class="profile-bet-status ${statusClass[b.status]}">${statusMap[b.status]||b.status}</span>
+          <div style="font-weight:700;font-size:0.88rem;color:#fff;margin-bottom:2px">${b.bet?.title||'Aposta'}</div>
+          ${b.option ? `<div style="font-size:0.72rem;color:var(--text2);margin-bottom:4px">${b.option.label}</div>` : ''}
+          <div style="display:flex;justify-content:space-between;font-size:0.78rem">
+            <span style="color:var(--text2)">Apostado: <strong style="color:#fff">R$ ${amount}</strong></span>
+            <span style="color:var(--text2)">Potencial: <strong style="color:var(--green)">R$ ${potential}</strong></span>
+          </div>
+        </div>`;
+    }).join('');
+  } catch { document.getElementById('profileBetList').innerHTML = '<div style="text-align:center;color:var(--text2);padding:20px">Erro ao carregar</div>'; }
+}
+
+</script>
+
+<!-- PROFILE -->
+<div class="overlay" id="profileOverlay" onclick="closeOverlay(event,'profileOverlay')">
+  <div class="modal" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <button class="close-x" onclick="closeModal('profileOverlay')">✕</button>
+    <div id="profileContent">
+      <div style="text-align:center;padding:40px 0;color:var(--text2)">Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- BET SHEET -->
+<div class="bet-sheet" id="betSheet" style="display:none" onclick="closeBetSheetOutside(event)">
+  <div class="bet-sheet-inner">
+    <div class="bet-sheet-handle"></div>
+    <div class="bet-sheet-title" id="betSheetTitle"></div>
+    <div class="bet-sheet-sub" id="betSheetSub"></div>
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="bet-odd-badge" id="betSheetOdd"></span>
+    </div>
+    <div class="bet-amounts">
+      <button class="bet-amount-chip" onclick="setBetAmount(5)">R$5</button>
+      <button class="bet-amount-chip" onclick="setBetAmount(10)">R$10</button>
+      <button class="bet-amount-chip" onclick="setBetAmount(20)">R$20</button>
+      <button class="bet-amount-chip" onclick="setBetAmount(50)">R$50</button>
+      <button class="bet-amount-chip" onclick="setBetAmount(100)">R$100</button>
+    </div>
+    <div class="form-group">
+      <div class="dep-input-wrap"><span class="dep-currency-prefix">R$</span>
+        <input class="form-input" id="betAmountInput" type="text" inputmode="decimal" placeholder="0,00"
+          oninput="maskDepAmount(this);updatePotential()">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;padding:8px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px">
+      <div style="display:flex;align-items:center;gap:5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(16,185,129,0.8)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span style="font-size:0.65rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif;font-weight:600;letter-spacing:0.5px">PAGAMENTO SEGURO</span></div>
+      <div style="width:1px;height:12px;background:rgba(255,255,255,0.1)"></div>
+      <div style="display:flex;align-items:center;gap:5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(16,185,129,0.8)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span style="font-size:0.65rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif;font-weight:600;letter-spacing:0.5px">SSL PROTEGIDO</span></div>
+    </div>
+    <div class="bet-potential">
+      <div class="bet-potential-icon">💰</div>
+      <div class="bet-potential-info"><div class="bet-potential-label">Você ganha</div><div class="bet-potential-value" id="betPotential">R$ 0,00</div></div>
+    </div>
+    <button id="confirmBetBtn" onclick="confirmBet()" style="width:100%;padding:15px;font-size:0.95rem;font-weight:700;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:14px;color:#fff;cursor:pointer;box-shadow:0 4px 20px rgba(5,150,105,0.4),inset 0 1px 0 rgba(255,255,255,0.15);letter-spacing:0.3px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirmar Aposta</button>
+    <button onclick="closeBetSheet()" style="width:100%;padding:11px;font-size:0.85rem;font-weight:600;font-family:'Inter',sans-serif;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:14px;color:rgba(255,255,255,0.7);cursor:pointer;margin-top:8px;letter-spacing:0.2px">Cancelar</button>
+  </div>
+</div>
+
+</body>
+</html>
