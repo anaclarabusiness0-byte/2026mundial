@@ -21,14 +21,23 @@ export async function GET(req: NextRequest) {
       prisma.pixPayment.count({ where }),
       prisma.pixPayment.findMany({
         where,
-        include: { user: { select: { username: true, fullName: true, email: true } } },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
     ])
 
-    return NextResponse.json({ withdrawals, total, page, totalPages: Math.ceil(total / limit) })
+    // Busca usuários separadamente
+    const userIds = [...new Set(withdrawals.map(d => d.userId))]
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, username: true, fullName: true, email: true },
+    })
+    const userMap = Object.fromEntries(users.map(u => [u.id, u]))
+
+    const result = withdrawals.map(d => ({ ...d, user: userMap[d.userId] || null }))
+
+    return NextResponse.json({ withdrawals: result, total, page, totalPages: Math.ceil(total / limit) })
   } catch (err) {
     console.error('[WITHDRAWALS ERROR]', err)
     return NextResponse.json({ message: 'Erro interno' }, { status: 500 })
