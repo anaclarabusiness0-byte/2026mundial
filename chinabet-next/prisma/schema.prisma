@@ -1,0 +1,330 @@
+// ============================================================
+// CHINESA CASINO — Prisma Schema
+// PostgreSQL + Row-Level Locking for Seamless Wallet
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────────
+model User {
+  id            String   @id @default(uuid())
+  username      String   @unique
+  email         String   @unique
+  passwordHash  String
+  fullName      String
+  cpf           String   @unique
+  phone         String
+  role          Role     @default(PLAYER)
+  status        UserStatus @default(ACTIVE)
+  vipLevel      Int      @default(0)
+  rtpOverride        Float?   // null = usa configuração global
+  minSaqueRequerido  Float    @default(150)
+  saqueLiberad       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  wallet        Wallet?
+  transactions  Transaction[]
+  gameSessions  GameSession[]
+  auditLogs     AuditLog[]
+  mundialBets   UserMundialBet[]
+
+  @@index([email])
+  @@index([cpf])
+}
+
+enum Role {
+  PLAYER
+  AGENT
+  ADMIN
+  SUPERADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+// ─────────────────────────────────────────────
+// WALLETS — saldo com controle transacional
+// ─────────────────────────────────────────────
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  balance   Decimal  @default(0) @db.Decimal(18, 2)
+  currency  String   @default("BRL")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// TRANSACTIONS
+// ─────────────────────────────────────────────
+model Transaction {
+  id              String            @id @default(uuid())
+  userId          String
+  type            TransactionType
+  amount          Decimal           @db.Decimal(18, 2)
+  balanceBefore   Decimal           @db.Decimal(18, 2)
+  balanceAfter    Decimal           @db.Decimal(18, 2)
+  status          TransactionStatus @default(PENDING)
+  reference       String?           @unique  // ID externo (gateway/provider)
+  description     String?
+  metadata        Json?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user            User              @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([reference])
+  @@index([type, status])
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  BET
+  WIN
+  BONUS
+  MANUAL_CREDIT
+  MANUAL_DEBIT
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  PROCESSING
+}
+
+// ─────────────────────────────────────────────
+// GAMES
+// ─────────────────────────────────────────────
+model Game {
+  id           String      @id @default(uuid())
+  externalId   String      @unique   // ID do provedor
+  slug         String      @unique
+  name         String
+  provider     Provider
+  category     GameCategory
+  thumbnail    String?
+  isActive     Boolean     @default(true)
+  isFeatured   Boolean     @default(false)
+  rtpBase      Float       @default(96.0)  // RTP declarado pelo provedor
+  sortOrder    Int         @default(0)
+  metadata     Json?       // dados extras do provedor
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  sessions     GameSession[]
+
+  @@index([provider, isActive])
+  @@index([category])
+}
+
+enum Provider {
+  PG_SOFT
+  PRAGMATIC
+  EVOLUTION
+  HACKSAW
+}
+
+enum GameCategory {
+  SLOTS
+  LIVE
+  TABLE
+  CRASH
+  FISHING
+}
+
+// ─────────────────────────────────────────────
+// GAME SESSIONS — cada rodada / spin
+// ─────────────────────────────────────────────
+model GameSession {
+  id              String    @id @default(uuid())
+  userId          String
+  gameId          String
+  providerRoundId String?   @unique  // ID da rodada no provedor
+  betAmount       Decimal   @db.Decimal(18, 2)
+  winAmount       Decimal   @default(0) @db.Decimal(18, 2)
+  currency        String    @default("BRL")
+  status          SessionStatus @default(OPEN)
+  rtpApplied      Float?    // RTP efetivo desta rodada
+  createdAt       DateTime  @default(now())
+  resolvedAt      DateTime?
+
+  user            User      @relation(fields: [userId], references: [id])
+  game            Game      @relation(fields: [gameId], references: [id])
+
+  @@index([userId])
+  @@index([providerRoundId])
+}
+
+enum SessionStatus {
+  OPEN
+  WON
+  LOST
+  REFUNDED
+}
+
+// ─────────────────────────────────────────────
+// PLATFORM SETTINGS
+// ─────────────────────────────────────────────
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  type      String   @default("string")  // string | number | boolean | json
+  group     String   @default("general")
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+
+  @@index([group])
+}
+
+// ─────────────────────────────────────────────
+// PIX PAYMENTS
+// ─────────────────────────────────────────────
+model PixPayment {
+  id            String      @id @default(uuid())
+  userId        String
+  txid          String      @unique  // ID do gateway
+  amount        Decimal     @db.Decimal(18, 2)
+  type          PixType
+  status        PixStatus   @default(PENDING)
+  pixKey        String?
+  qrCode        String?
+  expiresAt     DateTime?
+  paidAt        DateTime?
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([txid])
+  @@index([status])
+}
+
+enum PixType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum PixStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  CANCELLED
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOG — rastreio de ações admin
+// ─────────────────────────────────────────────
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  adminId    String?
+  action     String
+  entity     String
+  entityId   String?
+  before     Json?
+  after      Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id])
+
+  @@index([entity, entityId])
+  @@index([adminId])
+}
+
+// ─────────────────────────────────────────────
+// MUNDIAL — Mercado de Previsões
+// ─────────────────────────────────────────────
+model MundialBet {
+  id          String        @id @default(uuid())
+  title       String
+  description String
+  imageData   String?       @db.Text   // base64 da imagem
+  simLabel    String        @default("SIM")
+  naoLabel    String        @default("NÃO")
+  simPercent  Float         @default(50)   // barra visual %
+  simOdd      Float         @default(1.90)
+  naoOdd      Float         @default(1.90)
+  status      MundialStatus @default(OPEN)
+  result      String?       // 'sim' | 'nao' | null
+  sortOrder   Int           @default(0)
+  expiresAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  options     MundialOption[]
+  userBets    UserMundialBet[]
+}
+
+model MundialOption {
+  id         String   @id @default(uuid())
+  betId      String
+  label      String
+  side       String   // 'sim' | 'nao'
+  multiplier Float    @default(2.50)
+  sortOrder  Int      @default(0)
+
+  bet        MundialBet       @relation(fields: [betId], references: [id], onDelete: Cascade)
+  userBets   UserMundialBet[]
+
+  @@index([betId])
+}
+
+model UserMundialBet {
+  id           String        @id @default(uuid())
+  userId       String
+  betId        String
+  optionId     String?
+  side         String        // 'sim' | 'nao'
+  amount       Decimal       @db.Decimal(18, 2)
+  odd          Float
+  potentialWin Decimal       @db.Decimal(18, 2)
+  status       UserBetStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
+  resolvedAt   DateTime?
+
+  user   User           @relation(fields: [userId], references: [id])
+  bet    MundialBet     @relation(fields: [betId], references: [id])
+  option MundialOption? @relation(fields: [optionId], references: [id])
+
+  @@index([userId])
+  @@index([betId])
+}
+
+enum MundialStatus {
+  OPEN
+  CLOSED
+  RESOLVED
+  CANCELLED
+}
+
+enum UserBetStatus {
+  PENDING
+  WON
+  LOST
+  CANCELLED
+}
